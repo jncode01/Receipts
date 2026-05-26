@@ -1,0 +1,17 @@
+html, body, #root { height: 100%; }
+html, body { margin: 0; padding: 0; background: #F7F4EE; }
+body {
+  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #1A1714;
+  overscroll-behavior-y: none;
+}
+* { box-sizing: border-box; }
+a { color: inherit; }
+button { font-family: inherit; }
+
+/* keep iOS safe-area happy on PWA install */
+@supports (padding: max(0px)) {
+  body { padding-bottom: env(safe-area-inset-bottom); }
+}
