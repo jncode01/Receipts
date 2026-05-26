@@ -161,13 +161,35 @@ export function useReceiptMutations() {
 }
 
 // ─── IMAGES ──────────────────────────────────────────────────────────────────
+import imageCompression from 'browser-image-compression';
+
 export async function uploadReceiptImage(file: File): Promise<string> {
   const { data: u } = await supabase.auth.getUser();
   const user_id = u.user!.id;
-  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+
+  // Compress before upload — receipts don't need to be 10MB photos.
+  // Targets ~1MB max, ~2000px on longest side, preserves orientation.
+  // PDFs and non-images skip compression.
+  let toUpload: File | Blob = file;
+  if (file.type.startsWith('image/')) {
+    try {
+      toUpload = await imageCompression(file, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 2000,
+        useWebWorker: true,
+        fileType: 'image/jpeg',
+      });
+    } catch (e) {
+      console.warn('[dockit] compression failed, uploading original', e);
+    }
+  }
+
+  const ext = file.type === 'application/pdf' ? 'pdf' : 'jpg';
   const path = `${user_id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
-    cacheControl: '3600', upsert: false, contentType: file.type,
+  const { error } = await supabase.storage.from(BUCKET).upload(path, toUpload, {
+    cacheControl: '3600',
+    upsert: false,
+    contentType: toUpload instanceof File ? toUpload.type : (ext === 'pdf' ? 'application/pdf' : 'image/jpeg'),
   });
   if (error) throw error;
   return path;
