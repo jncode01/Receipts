@@ -14,9 +14,19 @@ export function ReceiptDetailPage() {
   const { update, remove } = useReceiptMutations();
 
   const [imgUrl, setImgUrl] = useState<string | null>(null);
+  const [lightbox, setLightbox] = useState(false);
   useEffect(() => {
     if (r?.image_path) getImageUrl(r.image_path).then(setImgUrl).catch(() => setImgUrl(null));
   }, [r?.image_path]);
+
+  const isPdf = !!r?.image_path && /\.pdf($|\?)/i.test(r.image_path);
+
+  useEffect(() => {
+    if (!lightbox) return;
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') setLightbox(false); };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, [lightbox]);
 
   // ── Edit state ─────────────────────────────────────────────────────────
   const [editing, setEditing] = useState(false);
@@ -108,7 +118,52 @@ export function ReceiptDetailPage() {
             borderRadius: 6, overflow: 'hidden', background: theme.sub,
             border: `1px solid ${theme.line}`, alignSelf: 'flex-start',
           }}>
-            <img src={imgUrl} alt="receipt" style={{ width: '100%', display: 'block' }}/>
+            {isPdf ? (
+              <div>
+                <object
+                  data={imgUrl + '#toolbar=0&navpanes=0&view=FitH'}
+                  type="application/pdf"
+                  style={{ width: '100%', height: 360, display: 'block', background: theme.panel }}
+                >
+                  <div style={{
+                    padding: '32px 18px', textAlign: 'center',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+                    fontSize: 12, color: theme.mute,
+                  }}>
+                    <div style={{
+                      width: 44, height: 44, borderRadius: 10, background: theme.tag,
+                      color: theme.mute, display: 'grid', placeItems: 'center',
+                    }}>
+                      <Icon.pdf size={20}/>
+                    </div>
+                    <div style={{ color: theme.ink, fontWeight: 600, fontSize: 13 }}>PDF receipt</div>
+                    <div>Inline preview unavailable.</div>
+                  </div>
+                </object>
+                <div style={{
+                  display: 'flex', gap: 6, padding: 8,
+                  borderTop: `1px solid ${theme.line}`, background: theme.panel,
+                }}>
+                  <button onClick={() => setLightbox(true)} style={previewBtnStyle}>
+                    <Icon.expand size={11}/> Enlarge
+                  </button>
+                  <a href={imgUrl} target="_blank" rel="noreferrer" style={{ ...previewBtnStyle, textDecoration: 'none' }}>
+                    <Icon.download size={11}/> Open
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setLightbox(true)}
+                title="Click to enlarge"
+                style={{
+                  display: 'block', width: '100%', padding: 0, border: 'none',
+                  background: 'transparent', cursor: 'zoom-in',
+                }}
+              >
+                <img src={imgUrl} alt="receipt" style={{ width: '100%', display: 'block' }}/>
+              </button>
+            )}
           </div>
         )}
 
@@ -238,9 +293,91 @@ export function ReceiptDetailPage() {
           </div>
         )}
       </div>
+
+      {lightbox && imgUrl && (
+        <div
+          onClick={() => setLightbox(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 100,
+            background: 'rgba(20,18,15,0.86)',
+            display: 'grid', placeItems: 'center',
+            padding: 32, animation: 'lbFade 120ms ease-out',
+            cursor: 'zoom-out',
+          }}
+        >
+          <style>{`@keyframes lbFade { from { opacity: 0 } to { opacity: 1 } }`}</style>
+          <button
+            onClick={(e) => { e.stopPropagation(); setLightbox(false); }}
+            aria-label="Close"
+            style={{
+              position: 'absolute', top: 18, right: 20,
+              width: 36, height: 36, borderRadius: 999,
+              border: 'none', background: 'rgba(255,255,255,0.12)',
+              color: '#fff', cursor: 'pointer',
+              display: 'grid', placeItems: 'center',
+              backdropFilter: 'blur(8px)',
+            }}
+          >
+            <Icon.close size={14}/>
+          </button>
+          <a
+            href={imgUrl} target="_blank" rel="noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: 'absolute', top: 18, right: 64,
+              padding: '8px 12px', borderRadius: 999,
+              background: 'rgba(255,255,255,0.12)', color: '#fff',
+              fontSize: 11, fontWeight: 600, fontFamily: theme.fontSans,
+              textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6,
+              backdropFilter: 'blur(8px)',
+            }}
+          >
+            <Icon.download size={11}/> Open in new tab
+          </a>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '92vw', maxHeight: '88vh',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'default',
+            }}
+          >
+            {isPdf ? (
+              <iframe
+                src={imgUrl}
+                title="receipt PDF"
+                style={{
+                  width: 'min(900px, 92vw)', height: '88vh',
+                  border: 'none', borderRadius: 8, background: '#fff',
+                  boxShadow: '0 24px 60px rgba(0,0,0,0.45)',
+                }}
+              />
+            ) : (
+              <img
+                src={imgUrl}
+                alt="receipt enlarged"
+                style={{
+                  maxWidth: '92vw', maxHeight: '88vh',
+                  display: 'block', objectFit: 'contain',
+                  borderRadius: 4,
+                  boxShadow: '0 24px 60px rgba(0,0,0,0.45)',
+                }}
+              />
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+const previewBtnStyle: React.CSSProperties = {
+  display: 'inline-flex', alignItems: 'center', gap: 5,
+  padding: '5px 10px', borderRadius: 6,
+  border: `1px solid ${theme.line}`, background: theme.sub,
+  color: theme.ink, fontSize: 11, fontWeight: 500, fontFamily: theme.fontSans,
+  cursor: 'pointer', flex: 1, justifyContent: 'center',
+};
 
 const SectionLabel: React.CSSProperties = {
   fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase',

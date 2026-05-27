@@ -21,6 +21,9 @@ export const Icon = {
   edit:     (p: I = {}) => <svg width={p.size||14} height={p.size||14} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M3 13v-2l8-8 2 2-8 8H3zM10 4l2 2"/></svg>,
   pin:      (p: I = {}) => <svg width={p.size||14} height={p.size||14} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2c-2.5 0-4 1.8-4 4 0 3 4 8 4 8s4-5 4-8c0-2.2-1.5-4-4-4z"/><circle cx="8" cy="6" r="1.5"/></svg>,
   sort:     (p: I = {}) => <svg width={p.size||14} height={p.size||14} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M5 3v10M3 11l2 2 2-2M11 3v10M9 5l2-2 2 2"/></svg>,
+  note:     (p: I = {}) => <svg width={p.size||14} height={p.size||14} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3h7l3 3v7a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M5 7h5M5 10h4"/></svg>,
+  expand:   (p: I = {}) => <svg width={p.size||14} height={p.size||14} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3h4M3 3v4M13 13H9M13 13V9M3 13v-4M3 13h4M13 3v4M13 3H9"/></svg>,
+  pdf:      (p: I = {}) => <svg width={p.size||14} height={p.size||14} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"><path d="M4 2h6l3 3v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/><path d="M10 2v3h3"/></svg>,
 };
 
 // ── Atoms ───────────────────────────────────────────────────────────────────
