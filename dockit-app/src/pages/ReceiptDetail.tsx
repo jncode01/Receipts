@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useReceipt, useCategories, useProjects, useReceiptMutations, getImageUrl } from '../hooks/useData';
 import { fmtNZD, fmtDate } from '../lib/format';
@@ -53,7 +53,7 @@ export function ReceiptDetailPage() {
       date: r.date,
       merchant: r.merchant,
       total: String(r.total),
-      gst: r.gst != null ? String(r.gst) : '',
+      gstClaimable: r.gst != null,
       location: r.location || '',
       category_id: r.category_id,
       project_id: r.project_id,
@@ -71,7 +71,7 @@ export function ReceiptDetailPage() {
         date: form.date,
         merchant: form.merchant,
         total: Number(form.total),
-        gst: form.gst ? Number(form.gst) : null,
+        gst: form.gstClaimable ? Math.round(Number(form.total) * 15) / 100 : null,
         location: form.location || null,
         category_id: form.category_id,
         project_id: form.project_id,
@@ -242,7 +242,19 @@ export function ReceiptDetailPage() {
               <Field label="Date" type="date" value={form.date} onChange={(v) => setForm({ ...form, date: v })}/>
               <Field label="Location" value={form.location} onChange={(v) => setForm({ ...form, location: v })}/>
               <Field label="Total" type="number" prefix="$" value={form.total} onChange={(v) => setForm({ ...form, total: v })}/>
-              <Field label="GST" type="number" prefix="$" value={form.gst} onChange={(v) => setForm({ ...form, gst: v })}/>
+              <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: theme.mute }}>GST</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 10px', borderRadius: 8, border: `1px solid ${theme.line}`, background: theme.sub, cursor: 'pointer' }}
+                  onClick={() => setForm({ ...form, gstClaimable: !form.gstClaimable })}>
+                  <input type="checkbox" checked={form.gstClaimable} readOnly style={{ cursor: 'pointer', accentColor: theme.accent, width: 14, height: 14 }}/>
+                  <span style={{ fontSize: 13, color: theme.ink, flex: 1 }}>Claimable</span>
+                  {form.gstClaimable && form.total && (
+                    <span style={{ fontSize: 12, color: theme.mute, fontFamily: theme.fontMono }}>
+                      {fmtNZD(Math.round(Number(form.total) * 15) / 100)}
+                    </span>
+                  )}
+                </div>
+              </label>
             </div>
 
             <div style={{ marginBottom: 16 }}>

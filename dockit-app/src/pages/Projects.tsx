@@ -14,6 +14,7 @@ export function ProjectsPage() {
 
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState({ name: '', color: PROJ_COLORS[0], budget: '' });
+  const [budgetEdit, setBudgetEdit] = useState<{ id: string; val: string } | null>(null);
 
   const spendByProject = useMemo(() => {
     const m: Record<string, number> = {};
@@ -84,7 +85,35 @@ export function ProjectsPage() {
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
                 <Money amount={v} size={20} theme={theme}/>
-                {p.budget != null && <Mono size={11} color={theme.mute}>of {fmtNZD(Number(p.budget), { cents: false })}</Mono>}
+                {budgetEdit?.id === p.id ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                    <span style={{ fontSize: 11, color: theme.mute, fontFamily: theme.fontMono }}>$</span>
+                    <input
+                      autoFocus
+                      type="number"
+                      value={budgetEdit.val}
+                      onChange={(e) => setBudgetEdit({ ...budgetEdit, val: e.target.value })}
+                      onBlur={async () => {
+                        await update.mutateAsync({ id: p.id, patch: { budget: budgetEdit.val ? Number(budgetEdit.val) : null } });
+                        setBudgetEdit(null);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') e.currentTarget.blur();
+                        if (e.key === 'Escape') setBudgetEdit(null);
+                      }}
+                      style={{ width: 80, padding: '2px 4px', borderRadius: 4, border: `1px solid ${theme.line}`, background: theme.sub, color: theme.ink, fontSize: 11, fontFamily: theme.fontMono, outline: 'none' }}
+                    />
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setBudgetEdit({ id: p.id, val: p.budget != null ? String(p.budget) : '' })}
+                    style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer' }}
+                  >
+                    {p.budget != null
+                      ? <Mono size={11} color={theme.mute}>of {fmtNZD(Number(p.budget), { cents: false })}</Mono>
+                      : <span style={{ fontSize: 11, color: theme.mute, opacity: 0.6 }}>Set budget</span>}
+                  </button>
+                )}
               </div>
               {p.budget != null && (
                 <>

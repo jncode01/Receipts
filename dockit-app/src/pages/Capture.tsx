@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCategories, useProjects, useReceiptMutations, uploadReceiptImage } from '../hooks/useData';
 import { parseReceipt } from '../lib/ocr';
-import { todayISO } from '../lib/format';
+import { todayISO, fmtNZD } from '../lib/format';
 import { theme } from '../lib/theme';
 import { Icon, Dot, ButtonPrimary, ButtonGhost, Money } from '../components/ui';
 
@@ -24,7 +24,7 @@ export function CapturePage() {
   const [date,     setDate]     = useState(todayISO());
   const [merchant, setMerchant] = useState('');
   const [total,    setTotal]    = useState('');
-  const [gst,      setGst]      = useState('');
+  const [gstClaimable, setGstClaimable] = useState(false);
   const [location, setLocation] = useState('');
   const [catId,    setCatId]    = useState<string | null>(null);
   const [projId,   setProjId]   = useState<string | null>(null);
@@ -45,7 +45,7 @@ export function CapturePage() {
         if (fields.merchant) setMerchant(fields.merchant);
         if (fields.date)     setDate(fields.date);
         if (fields.total != null) setTotal(String(fields.total));
-        if (fields.gst != null)   setGst(String(fields.gst));
+        if (fields.gst != null)   setGstClaimable(true);
         if (fields.location) setLocation(fields.location);
       }
       setStage('review');
@@ -67,7 +67,7 @@ export function CapturePage() {
       date,
       merchant,
       total: Number(total),
-      gst: gst ? Number(gst) : null,
+      gst: gstClaimable ? Math.round(Number(total) * 15) / 100 : null,
       location: location || null,
       category_id: catId,
       project_id: projId,
@@ -170,7 +170,19 @@ export function CapturePage() {
           <Field label="Merchant" value={merchant} onChange={setMerchant} placeholder="Mitre 10" />
           <Field label="Date" type="date" value={date} onChange={setDate} />
           <Field label="Total" type="number" value={total} onChange={setTotal} prefix="$" placeholder="0.00" />
-          <Field label="GST" type="number" value={gst} onChange={setGst} prefix="$" placeholder="0.00" />
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: theme.mute }}>GST</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 10px', borderRadius: 8, border: '1px solid rgba(26,23,20,0.14)', background: '#FAF7F1', cursor: 'pointer' }}
+              onClick={() => setGstClaimable(v => !v)}>
+              <input type="checkbox" checked={gstClaimable} readOnly style={{ cursor: 'pointer', accentColor: theme.accent, width: 14, height: 14 }}/>
+              <span style={{ fontSize: 13, color: theme.ink, flex: 1 }}>Claimable</span>
+              {gstClaimable && total && (
+                <span style={{ fontSize: 12, color: theme.mute, fontFamily: theme.fontMono }}>
+                  {fmtNZD(Math.round(Number(total) * 15) / 100)}
+                </span>
+              )}
+            </div>
+          </label>
           <Field label="Location" value={location} onChange={setLocation} placeholder="Mt Wellington" wide/>
         </div>
       </div>
