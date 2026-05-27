@@ -16,6 +16,12 @@ export function ProjectsPage() {
   const [draft, setDraft] = useState({ name: '', color: PROJ_COLORS[0], budget: '' });
   const [budgetEdit, setBudgetEdit] = useState<{ id: string; val: string } | null>(null);
 
+  async function saveBudget() {
+    if (!budgetEdit) return;
+    await update.mutateAsync({ id: budgetEdit.id, patch: { budget: budgetEdit.val ? Number(budgetEdit.val) : null } });
+    setBudgetEdit(null);
+  }
+
   const spendByProject = useMemo(() => {
     const m: Record<string, number> = {};
     for (const r of receipts) if (r.project_id) m[r.project_id] = (m[r.project_id] || 0) + Number(r.total);
@@ -83,36 +89,37 @@ export function ProjectsPage() {
                   if (next && next !== p.name) update.mutate({ id: p.id, patch: { name: next } });
                 }}><Icon.edit size={13}/></button>
               </div>
-              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                 <Money amount={v} size={20} theme={theme}/>
                 {budgetEdit?.id === p.id ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <span style={{ fontSize: 11, color: theme.mute, fontFamily: theme.fontMono }}>$</span>
                     <input
                       autoFocus
                       type="number"
+                      placeholder="0"
                       value={budgetEdit.val}
-                      onChange={(e) => setBudgetEdit({ ...budgetEdit, val: e.target.value })}
-                      onBlur={async () => {
-                        await update.mutateAsync({ id: p.id, patch: { budget: budgetEdit.val ? Number(budgetEdit.val) : null } });
-                        setBudgetEdit(null);
-                      }}
+                      onChange={(e) => setBudgetEdit({ id: p.id, val: e.target.value })}
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter') e.currentTarget.blur();
+                        if (e.key === 'Enter') saveBudget();
                         if (e.key === 'Escape') setBudgetEdit(null);
                       }}
-                      style={{ width: 80, padding: '2px 4px', borderRadius: 4, border: `1px solid ${theme.line}`, background: theme.sub, color: theme.ink, fontSize: 11, fontFamily: theme.fontMono, outline: 'none' }}
+                      style={{ width: 72, padding: '3px 6px', borderRadius: 5, border: `1px solid ${theme.line}`, background: theme.sub, color: theme.ink, fontSize: 12, fontFamily: theme.fontMono, outline: 'none' }}
                     />
+                    <button onClick={saveBudget} style={{ ...iconBtn, color: theme.accent }}><Icon.check size={11}/></button>
+                    <button onClick={() => setBudgetEdit(null)} style={iconBtn}><Icon.close size={10}/></button>
                   </div>
                 ) : (
-                  <button
-                    onClick={() => setBudgetEdit({ id: p.id, val: p.budget != null ? String(p.budget) : '' })}
-                    style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer' }}
-                  >
-                    {p.budget != null
-                      ? <Mono size={11} color={theme.mute}>of {fmtNZD(Number(p.budget), { cents: false })}</Mono>
-                      : <span style={{ fontSize: 11, color: theme.mute, opacity: 0.6 }}>Set budget</span>}
-                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    {p.budget != null && <Mono size={11} color={theme.mute}>of {fmtNZD(Number(p.budget), { cents: false })}</Mono>}
+                    <button
+                      onClick={() => setBudgetEdit({ id: p.id, val: p.budget != null ? String(p.budget) : '' })}
+                      style={iconBtn}
+                      title={p.budget != null ? 'Edit budget' : 'Set budget'}
+                    >
+                      <Icon.edit size={11}/>
+                    </button>
+                  </div>
                 )}
               </div>
               {p.budget != null && (
