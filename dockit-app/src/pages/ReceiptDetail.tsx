@@ -5,9 +5,22 @@ import { fmtNZD, fmtDate } from '../lib/format';
 import { theme } from '../lib/theme';
 import { Money, Mono, Dot, Tag, Icon, ButtonGhost, ButtonPrimary, Panel } from '../components/ui';
 
+function useIsMobile(breakpoint = 720) {
+  const get = () => typeof window !== 'undefined' && window.matchMedia(`(max-width: ${breakpoint}px)`).matches;
+  const [m, setM] = useState(get);
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${breakpoint}px)`);
+    const h = () => setM(mq.matches);
+    mq.addEventListener('change', h);
+    return () => mq.removeEventListener('change', h);
+  }, [breakpoint]);
+  return m;
+}
+
 export function ReceiptDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const { data: r, isLoading } = useReceipt(id);
   const { data: categories = [] } = useCategories();
   const { data: projects = [] } = useProjects();
@@ -81,9 +94,9 @@ export function ReceiptDetailPage() {
   const proj = (editing ? form.project_id  : r.project_id)  ? projects.find(p => p.id === (editing ? form.project_id : r.project_id))   : null;
 
   return (
-    <div style={{ padding: '20px 28px 80px', maxWidth: 880, margin: '0 auto' }}>
+    <div style={{ padding: isMobile ? '14px 16px 80px' : '20px 28px 80px', maxWidth: 880, margin: '0 auto' }}>
       {/* Top bar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: isMobile ? 14 : 18, flexWrap: 'wrap' }}>
         <Link to="/receipts" style={{ color: theme.mute, display: 'flex', textDecoration: 'none' }}>
           <Icon.chevron size={14} dir={180}/>
         </Link>
@@ -111,12 +124,19 @@ export function ReceiptDetailPage() {
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: imgUrl ? 'minmax(0, 280px) minmax(0, 1fr)' : '1fr', gap: 24 }}>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: imgUrl && !isMobile ? 'minmax(0, 260px) minmax(0, 1fr)' : '1fr',
+        gap: isMobile ? 16 : 24,
+      }}>
         {imgUrl && (
           <div style={{
-            position: 'sticky', top: 24,
+            position: isMobile ? 'static' : 'sticky', top: 24,
             borderRadius: 6, overflow: 'hidden', background: theme.sub,
             border: `1px solid ${theme.line}`, alignSelf: 'flex-start',
+            maxWidth: isMobile ? 240 : undefined,
+            margin: isMobile ? '0 auto' : undefined,
+            width: isMobile ? '100%' : undefined,
           }}>
             {isPdf ? (
               <div>
@@ -217,7 +237,7 @@ export function ReceiptDetailPage() {
           </div>
         ) : (
           <div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10, marginBottom: 16 }}>
               <Field label="Merchant" value={form.merchant} onChange={(v) => setForm({ ...form, merchant: v })} wide/>
               <Field label="Date" type="date" value={form.date} onChange={(v) => setForm({ ...form, date: v })}/>
               <Field label="Location" value={form.location} onChange={(v) => setForm({ ...form, location: v })}/>

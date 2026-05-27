@@ -1,13 +1,30 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useReceipts, useCategories, useProjects } from '../hooks/useData';
 import { fmtNZD, fmtDate, monthlySpend } from '../lib/format';
 import { theme } from '../lib/theme';
-import { Panel, Donut, HBars, AreaChart, Money, Mono, Dot, Tag, Icon, ButtonPrimary, ButtonGhost } from '../components/ui';
+import { Panel, Donut, HBars, AreaChart, Money, Mono, Dot, Icon, ButtonPrimary, ButtonGhost } from '../components/ui';
 import { PageHeader } from '../components/AppShell';
 
+const RANGES: { key: '1m' | '3m' | '6m' | '1y'; label: string; sub: string; months: number }[] = [
+  { key: '1m', label: '1M', sub: 'Last month',     months: 1  },
+  { key: '3m', label: '3M', sub: 'Last 3 months',  months: 3  },
+  { key: '6m', label: '6M', sub: 'Last 6 months',  months: 6  },
+  { key: '1y', label: '1Y', sub: 'Past year',      months: 12 },
+];
+
+function monthsAgoISO(months: number): string {
+  const d = new Date();
+  d.setMonth(d.getMonth() - months);
+  return d.toISOString().slice(0, 10);
+}
+
 export function OverviewPage() {
-  const { data: receipts = [] } = useReceipts();
+  const [rangeKey, setRangeKey] = useState<'1m' | '3m' | '6m' | '1y'>('6m');
+  const range = RANGES.find(r => r.key === rangeKey)!;
+  const from = useMemo(() => monthsAgoISO(range.months), [range.months]);
+
+  const { data: receipts = [] } = useReceipts({ from });
   const { data: categories = [] } = useCategories();
   const { data: projects = [] } = useProjects();
 
@@ -29,9 +46,25 @@ export function OverviewPage() {
 
   return (
     <div style={{ padding: '22px 28px' }}>
-      <PageHeader sub="Last 6 months" title="Overview"
+      <PageHeader sub={range.sub} title="Overview"
         right={
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{
+              display: 'inline-flex', padding: 2, background: theme.tag, borderRadius: 8,
+            }}>
+              {RANGES.map(r => {
+                const on = r.key === rangeKey;
+                return (
+                  <button key={r.key} onClick={() => setRangeKey(r.key)} style={{
+                    padding: '5px 11px', borderRadius: 6, border: 'none',
+                    background: on ? theme.panel : 'transparent',
+                    color: on ? theme.ink : theme.mute,
+                    fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: theme.fontSans,
+                    boxShadow: on ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                  }}>{r.label}</button>
+                );
+              })}
+            </div>
             <Link to="/export"><ButtonGhost theme={theme} icon={Icon.download}>Export</ButtonGhost></Link>
             <Link to="/capture"><ButtonPrimary theme={theme} icon={Icon.camera}>Add receipt</ButtonPrimary></Link>
           </div>

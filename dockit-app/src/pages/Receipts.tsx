@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useReceipts, useCategories, useProjects, type ReceiptFilter } from '../hooks/useData';
 import { fmtNZD, fmtDate } from '../lib/format';
@@ -24,7 +24,6 @@ export function ReceiptsPage() {
   const [preset, setPreset] = useState<string>('All');
   const [cats, setCats] = useState<string[]>([]);
   const [projs, setProjs] = useState<string[]>([]);
-  const [openNote, setOpenNote] = useState<string | null>(null);
 
   const { data: categories = [] } = useCategories();
   const { data: projects = [] }   = useProjects();
@@ -125,33 +124,29 @@ export function ReceiptsPage() {
               const cat = r.category_id ? catMap[r.category_id] : null;
               const proj = r.project_id ? projMap[r.project_id] : null;
               const hasNote = !!(r.note && r.note.trim());
-              const noteOpen = openNote === r.id;
               return (
-                <Fragment key={r.id}>
-                <tr style={{ borderBottom: noteOpen ? 'none' : `1px solid ${theme.line}` }}>
-                  <td style={{ padding: '10px 8px 10px 28px' }}>
+                <tr key={r.id} style={{ borderBottom: `1px solid ${theme.line}` }}>
+                  <td style={{ padding: '10px 8px 10px 28px', verticalAlign: 'top' }}>
                     <Mono size={11} color={theme.mute}>{fmtDate(r.date, { style: 'medium' })}</Mono>
                   </td>
                   <td style={{ padding: '10px 8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <Link to={'/receipts/' + r.id} style={{ color: theme.ink, fontWeight: 500, textDecoration: 'none' }}>{r.merchant}</Link>
-                      {hasNote && (
-                        <button
-                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpenNote(noteOpen ? null : r.id); }}
-                          title={noteOpen ? 'Hide note' : 'Quick view note'}
-                          style={{
-                            display: 'inline-flex', alignItems: 'center', gap: 3,
-                            border: 'none', cursor: 'pointer', padding: '2px 5px',
-                            borderRadius: 5,
-                            background: noteOpen ? theme.ink : theme.tag,
-                            color: noteOpen ? theme.panel : theme.mute,
-                          }}
-                        >
-                          <Icon.note size={10}/>
-                        </button>
-                      )}
-                    </div>
+                    <Link to={'/receipts/' + r.id} style={{ color: theme.ink, fontWeight: 500, textDecoration: 'none' }}>{r.merchant}</Link>
                     {r.location && <div style={{ fontSize: 10, color: theme.mute }}>{r.location}</div>}
+                    {hasNote && (
+                      <div style={{
+                        display: 'flex', alignItems: 'flex-start', gap: 5, marginTop: 4,
+                        fontSize: 11, color: theme.mute, lineHeight: 1.4,
+                        maxWidth: 420,
+                      }}>
+                        <span style={{ display: 'flex', marginTop: 2, flexShrink: 0, opacity: 0.7 }}>
+                          <Icon.note size={10}/>
+                        </span>
+                        <span style={{
+                          overflow: 'hidden', textOverflow: 'ellipsis',
+                          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                        }}>{r.note}</span>
+                      </div>
+                    )}
                   </td>
                   <td style={{ padding: '10px 8px' }}>
                     {cat ? <Tag name={cat.name} color={cat.color} theme={theme} size="xs"/> : <span style={{ color: theme.faint, fontSize: 11 }}>—</span>}
@@ -170,34 +165,6 @@ export function ReceiptsPage() {
                     <Mono size={12} color={theme.ink} weight={500}>{fmtNZD(Number(r.total))}</Mono>
                   </td>
                 </tr>
-                {noteOpen && (
-                  <tr style={{ borderBottom: `1px solid ${theme.line}`, background: theme.sub }}>
-                    <td colSpan={6} style={{ padding: '0 28px 14px 28px' }}>
-                      <div style={{
-                        display: 'flex', gap: 10, alignItems: 'flex-start',
-                        padding: '12px 14px', background: theme.panel,
-                        border: `1px solid ${theme.line}`, borderRadius: 8,
-                        fontSize: 12, color: theme.ink, lineHeight: 1.55,
-                      }}>
-                        <span style={{ color: theme.mute, display: 'flex', marginTop: 2 }}>
-                          <Icon.note size={12}/>
-                        </span>
-                        <div style={{ flex: 1, whiteSpace: 'pre-wrap' }}>{r.note}</div>
-                        <button
-                          onClick={() => setOpenNote(null)}
-                          style={{
-                            border: 'none', background: 'transparent', color: theme.mute,
-                            cursor: 'pointer', padding: 2, display: 'flex',
-                          }}
-                          aria-label="Close note"
-                        >
-                          <Icon.close size={11}/>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-                </Fragment>
               );
             })}
             {!isLoading && !receipts.length && (
