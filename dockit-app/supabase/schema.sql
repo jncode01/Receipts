@@ -47,6 +47,7 @@ create table public.receipts (
   total         numeric(12, 2) not null,
   gst           numeric(12, 2),
   items         int,
+  warranty_months int,
   tags          text[] not null default '{}',
   note          text,
   -- Image + OCR

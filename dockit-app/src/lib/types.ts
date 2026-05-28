@@ -32,6 +32,7 @@ export type Receipt = {
   total: number;
   gst: number | null;
   items: number | null;
+  warranty_months: number | null;
   tags: string[];
   note: string | null;
   image_path: string | null;

@@ -31,6 +31,7 @@ export function CapturePage() {
   const [tags,     setTags]     = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [note,     setNote]     = useState('');
+  const [warrantyMonths, setWarrantyMonths] = useState('');
 
   async function onFile(f: File) {
     setImageFile(f);
@@ -69,6 +70,7 @@ export function CapturePage() {
       total: Number(total),
       gst: gstClaimable ? Math.round(Number(total) * 15) / 100 : null,
       location: location || null,
+      warranty_months: warrantyMonths ? Number(warrantyMonths) : null,
       category_id: catId,
       project_id: projId,
       tags,
@@ -184,6 +186,15 @@ export function CapturePage() {
             </div>
           </label>
           <Field label="Location" value={location} onChange={setLocation} placeholder="Mt Wellington" wide/>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: theme.mute }}>Warranty</span>
+            <div style={{ display: 'flex', alignItems: 'center', padding: '0 10px', borderRadius: 8, border: `1px solid ${theme.line}`, background: theme.sub }}>
+              <input type="number" min="0" value={warrantyMonths} onChange={(e) => setWarrantyMonths(e.target.value)}
+                placeholder="0"
+                style={{ flex: 1, border: 'none', background: 'transparent', padding: '9px 0', color: theme.ink, fontSize: 13, fontFamily: theme.fontSans, outline: 'none', minWidth: 0 }}/>
+              <span style={{ color: theme.mute, fontSize: 12, fontFamily: theme.fontMono, marginLeft: 4, flexShrink: 0 }}>mo</span>
+            </div>
+          </label>
         </div>
       </div>
 

@@ -55,6 +55,7 @@ export function ReceiptDetailPage() {
       total: String(r.total),
       gstClaimable: r.gst != null,
       location: r.location || '',
+      warranty_months: r.warranty_months ? String(r.warranty_months) : '',
       category_id: r.category_id,
       project_id: r.project_id,
       tags: [...r.tags],
@@ -73,6 +74,7 @@ export function ReceiptDetailPage() {
         total: Number(form.total),
         gst: form.gstClaimable ? Math.round(Number(form.total) * 15) / 100 : null,
         location: form.location || null,
+        warranty_months: form.warranty_months ? Number(form.warranty_months) : null,
         category_id: form.category_id,
         project_id: form.project_id,
         tags: form.tags,
@@ -194,7 +196,27 @@ export function ReceiptDetailPage() {
               {fmtDate(r.date, { style: 'long' })}
             </div>
             <h1 style={{ margin: '0 0 4px', fontSize: 28, fontWeight: 600, letterSpacing: '-0.02em' }}>{r.merchant}</h1>
-            {r.location && <div style={{ fontSize: 13, color: theme.mute, marginBottom: 18 }}>{r.location}</div>}
+            {r.location && <div style={{ fontSize: 13, color: theme.mute, marginBottom: 10 }}>{r.location}</div>}
+
+            {(() => {
+              const w = warrantyInfo(r.date, r.warranty_months);
+              if (!w) return null;
+              return (
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 7,
+                    padding: '6px 11px', borderRadius: 8,
+                    background: w.inWarranty ? `${theme.pos}14` : `${theme.neg}12`,
+                    border: `1px solid ${w.inWarranty ? theme.pos + '30' : theme.neg + '30'}`,
+                    color: w.inWarranty ? theme.pos : theme.neg,
+                    fontSize: 12, fontWeight: 600,
+                  }}>
+                    <span style={{ width: 7, height: 7, borderRadius: 7, background: 'currentColor', display: 'inline-block', flexShrink: 0 }}/>
+                    {w.label}
+                  </div>
+                </div>
+              );
+            })()}
 
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 20, marginBottom: 24 }}>
               <Money amount={Number(r.total)} size={36} theme={theme}/>
@@ -253,6 +275,15 @@ export function ReceiptDetailPage() {
                       {fmtNZD(Math.round(Number(form.total) * 15) / 100)}
                     </span>
                   )}
+                </div>
+              </label>
+              <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: theme.mute }}>Warranty</span>
+                <div style={{ display: 'flex', alignItems: 'center', padding: '0 10px', borderRadius: 8, border: `1px solid ${theme.line}`, background: theme.sub }}>
+                  <input type="number" min="0" value={form.warranty_months} onChange={(e) => setForm({ ...form, warranty_months: e.target.value })}
+                    placeholder="0"
+                    style={{ flex: 1, border: 'none', background: 'transparent', padding: '9px 0', color: theme.ink, fontSize: 13, fontFamily: theme.fontSans, outline: 'none', minWidth: 0 }}/>
+                  <span style={{ color: theme.mute, fontSize: 12, fontFamily: theme.fontMono, marginLeft: 4, flexShrink: 0 }}>mo</span>
                 </div>
               </label>
             </div>
@@ -429,6 +460,20 @@ function pillStyle(on: boolean, color: string): React.CSSProperties {
     color: on ? color : theme.ink,
     fontSize: 12, fontWeight: on ? 600 : 500, cursor: 'pointer', fontFamily: theme.fontSans,
   };
+}
+
+function warrantyInfo(receiptDate: string, warrantyMonths: number | null) {
+  if (!warrantyMonths || warrantyMonths <= 0) return null;
+  const expiry = new Date(receiptDate + 'T00:00:00');
+  expiry.setMonth(expiry.getMonth() + warrantyMonths);
+  const expiryStr = expiry.toISOString().slice(0, 10);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const inWarranty = expiry > today;
+  const label = inWarranty
+    ? `In warranty · expires ${fmtDate(expiryStr, { style: 'medium' })}`
+    : `Out of warranty · expired ${fmtDate(expiryStr, { style: 'medium' })}`;
+  return { inWarranty, label };
 }
 
 function Field({ label, value, onChange, type = 'text', prefix, wide }:
