@@ -45,6 +45,7 @@ export function ReceiptDetailPage() {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<any>(null);
   const [tagInput, setTagInput] = useState('');
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // Initialise the form from the loaded receipt on enter-edit
   function startEdit() {
@@ -63,25 +64,30 @@ export function ReceiptDetailPage() {
     });
     setEditing(true);
   }
-  function cancelEdit() { setEditing(false); setForm(null); setTagInput(''); }
+  function cancelEdit() { setEditing(false); setForm(null); setTagInput(''); setSaveError(null); }
   async function saveEdit() {
     if (!r || !form) return;
-    await update.mutateAsync({
-      id: r.id,
-      patch: {
-        date: form.date,
-        merchant: form.merchant,
-        total: Number(form.total),
-        gst: form.gstClaimable ? Math.round(Number(form.total) * 15) / 100 : null,
-        location: form.location || null,
-        warranty_months: form.warranty_months ? Number(form.warranty_months) : null,
-        category_id: form.category_id,
-        project_id: form.project_id,
-        tags: form.tags,
-        note: form.note || null,
-      },
-    });
-    setEditing(false); setForm(null); setTagInput('');
+    setSaveError(null);
+    try {
+      await update.mutateAsync({
+        id: r.id,
+        patch: {
+          date: form.date,
+          merchant: form.merchant,
+          total: Number(form.total),
+          gst: form.gstClaimable ? Math.round(Number(form.total) * 15) / 100 : null,
+          location: form.location || null,
+          warranty_months: form.warranty_months ? Number(form.warranty_months) : null,
+          category_id: form.category_id,
+          project_id: form.project_id,
+          tags: form.tags,
+          note: form.note || null,
+        },
+      });
+      setEditing(false); setForm(null); setTagInput(''); setSaveError(null);
+    } catch (err: any) {
+      setSaveError(err?.message || 'Save failed. Please try again.');
+    }
   }
   function addTag() {
     const t = tagInput.trim().replace(/^#/, '');
@@ -122,6 +128,11 @@ export function ReceiptDetailPage() {
               disabled={!form?.merchant || !form?.total || update.isPending}>
               {update.isPending ? 'Saving…' : 'Save'}
             </ButtonPrimary>
+            {saveError && (
+              <span style={{ color: theme.neg, fontSize: 11, flexBasis: '100%', marginTop: 2 }}>
+                {saveError}
+              </span>
+            )}
           </>
         )}
       </div>
