@@ -137,3 +137,14 @@ create policy "receipt-images: owner delete"
     bucket_id = 'receipt-images'
     and (storage.foldername(name))[1] = auth.uid()::text
   );
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- MIGRATIONS
+--
+-- If you already ran this schema before a feature was added, run the
+-- statements below to bring your database up to date.
+-- ─────────────────────────────────────────────────────────────────────────────
+
+-- 2026-05-28 · Add warranty_months (safe to run even if column already exists)
+alter table public.receipts
+  add column if not exists warranty_months int;
