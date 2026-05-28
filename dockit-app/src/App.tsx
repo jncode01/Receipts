@@ -10,6 +10,7 @@ import { CapturePage } from './pages/Capture';
 import { CategoriesPage } from './pages/Categories';
 import { ProjectsPage } from './pages/Projects';
 import { ExportPage } from './pages/Export';
+import { WarrantyPage } from './pages/Warranty';
 import { theme } from './lib/theme';
 
 const queryClient = new QueryClient({
@@ -40,6 +41,7 @@ function Gate() {
         <Route path="/"             element={<OverviewPage />} />
         <Route path="/receipts"     element={<ReceiptsPage />} />
         <Route path="/receipts/:id" element={<ReceiptDetailPage />} />
+        <Route path="/warranty"     element={<WarrantyPage />} />
         <Route path="/capture"      element={<CapturePage />} />
         <Route path="/categories"   element={<CategoriesPage />} />
         <Route path="/projects"     element={<ProjectsPage />} />

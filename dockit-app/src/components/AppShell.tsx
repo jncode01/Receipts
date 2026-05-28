@@ -4,10 +4,11 @@ import { useAuth } from '../hooks/useAuth';
 import { theme } from '../lib/theme';
 
 const items = [
-  { to: '',           l: 'Overview',   i: Icon.spark  },
-  { to: 'receipts',   l: 'Receipts',   i: Icon.folder },
-  { to: 'projects',   l: 'Projects',   i: Icon.pin    },
-  { to: 'categories', l: 'Categories', i: Icon.tag    },
+  { to: '',           l: 'Overview',   i: Icon.spark    },
+  { to: 'receipts',   l: 'Receipts',   i: Icon.folder   },
+  { to: 'warranty',   l: 'Warranty',   i: Icon.shield   },
+  { to: 'projects',   l: 'Projects',   i: Icon.pin      },
+  { to: 'categories', l: 'Categories', i: Icon.tag      },
   { to: 'export',     l: 'Export',     i: Icon.download },
 ];
 
@@ -65,11 +66,11 @@ function Sidebar({ onSignOut }: { onSignOut: () => void }) {
 
 function BottomTabs({ path }: { path: string }) {
   const tabs = [
-    { to: '/',           l: 'Home',     i: Icon.spark  },
-    { to: '/receipts',   l: 'Receipts', i: Icon.folder },
-    { to: '/capture',    l: '',         i: Icon.camera, fab: true },
-    { to: '/projects',   l: 'Projects', i: Icon.pin    },
-    { to: '/categories', l: 'More',     i: Icon.dots   },
+    { to: '/',          l: 'Home',     i: Icon.spark  },
+    { to: '/receipts',  l: 'Receipts', i: Icon.folder },
+    { to: '/capture',   l: '',         i: Icon.camera, fab: true },
+    { to: '/warranty',  l: 'Warranty', i: Icon.shield },
+    { to: '/projects',  l: 'More',     i: Icon.dots   },
   ];
   return (
     <nav style={{

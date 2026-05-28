@@ -24,6 +24,7 @@ export const Icon = {
   note:     (p: I = {}) => <svg width={p.size||14} height={p.size||14} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3h7l3 3v7a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M5 7h5M5 10h4"/></svg>,
   expand:   (p: I = {}) => <svg width={p.size||14} height={p.size||14} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3h4M3 3v4M13 13H9M13 13V9M3 13v-4M3 13h4M13 3v4M13 3H9"/></svg>,
   pdf:      (p: I = {}) => <svg width={p.size||14} height={p.size||14} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"><path d="M4 2h6l3 3v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/><path d="M10 2v3h3"/></svg>,
+  shield:   (p: I = {}) => <svg width={p.size||14} height={p.size||14} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2L3 4.5v4c0 2.8 2.2 4.8 5 5.5 2.8-.7 5-2.7 5-5.5v-4L8 2z"/></svg>,
 };
 
 // ── Atoms ───────────────────────────────────────────────────────────────────
