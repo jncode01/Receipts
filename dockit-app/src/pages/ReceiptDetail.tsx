@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useReceipt, useCategories, useProjects, useReceiptMutations, getImageUrl } from '../hooks/useData';
-import { fmtNZD, fmtDate } from '../lib/format';
+import { fmtNZD, fmtDate, warrantyInfo } from '../lib/format';
 import { theme } from '../lib/theme';
 import { Money, Mono, Dot, Tag, Icon, ButtonGhost, ButtonPrimary, Panel } from '../components/ui';
 
@@ -460,20 +460,6 @@ function pillStyle(on: boolean, color: string): React.CSSProperties {
     color: on ? color : theme.ink,
     fontSize: 12, fontWeight: on ? 600 : 500, cursor: 'pointer', fontFamily: theme.fontSans,
   };
-}
-
-function warrantyInfo(receiptDate: string, warrantyMonths: number | null) {
-  if (!warrantyMonths || warrantyMonths <= 0) return null;
-  const expiry = new Date(receiptDate + 'T00:00:00');
-  expiry.setMonth(expiry.getMonth() + warrantyMonths);
-  const expiryStr = expiry.toISOString().slice(0, 10);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const inWarranty = expiry > today;
-  const label = inWarranty
-    ? `In warranty · expires ${fmtDate(expiryStr, { style: 'medium' })}`
-    : `Out of warranty · expired ${fmtDate(expiryStr, { style: 'medium' })}`;
-  return { inWarranty, label };
 }
 
 function Field({ label, value, onChange, type = 'text', prefix, wide }:

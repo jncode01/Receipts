@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useReceipts, useCategories, useProjects, type ReceiptFilter } from '../hooks/useData';
-import { fmtNZD, fmtDate } from '../lib/format';
+import { fmtNZD, fmtDate, warrantyInfo } from '../lib/format';
 import { theme } from '../lib/theme';
 import { Icon, Mono, Dot, Tag, ButtonGhost, ButtonPrimary } from '../components/ui';
 import { PageHeader } from '../components/AppShell';
@@ -124,6 +124,7 @@ export function ReceiptsPage() {
               const cat = r.category_id ? catMap[r.category_id] : null;
               const proj = r.project_id ? projMap[r.project_id] : null;
               const hasNote = !!(r.note && r.note.trim());
+              const warranty = warrantyInfo(r.date, r.warranty_months);
               return (
                 <tr key={r.id} style={{ borderBottom: `1px solid ${theme.line}` }}>
                   <td style={{ padding: '10px 8px 10px 28px', verticalAlign: 'top' }}>
@@ -145,6 +146,19 @@ export function ReceiptsPage() {
                           overflow: 'hidden', textOverflow: 'ellipsis',
                           display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
                         }}>{r.note}</span>
+                      </div>
+                    )}
+                    {warranty && (
+                      <div style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 4,
+                        fontSize: 10, fontWeight: 600,
+                        color: warranty.inWarranty ? theme.pos : theme.neg,
+                      }}>
+                        <span style={{
+                          width: 6, height: 6, borderRadius: 6,
+                          background: 'currentColor', flexShrink: 0,
+                        }}/>
+                        {warranty.label}
                       </div>
                     )}
                   </td>

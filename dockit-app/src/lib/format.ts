@@ -37,6 +37,20 @@ export function monthlySpend(receipts: { date: string; total: number }[]) {
   return Object.keys(m).sort().map((k) => ({ month: k, total: m[k] }));
 }
 
+export function warrantyInfo(receiptDate: string, warrantyMonths: number | null) {
+  if (!warrantyMonths || warrantyMonths <= 0) return null;
+  const expiry = new Date(receiptDate + 'T00:00:00');
+  expiry.setMonth(expiry.getMonth() + warrantyMonths);
+  const expiryStr = expiry.toISOString().slice(0, 10);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const inWarranty = expiry > today;
+  const label = inWarranty
+    ? `In warranty · expires ${fmtDate(expiryStr, { style: 'medium' })}`
+    : `Out of warranty · expired ${fmtDate(expiryStr, { style: 'medium' })}`;
+  return { inWarranty, label };
+}
+
 // Today as YYYY-MM-DD in local tz
 export function todayISO(): string {
   const d = new Date();
