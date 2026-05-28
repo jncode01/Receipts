@@ -1,8 +1,11 @@
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Dockit · Supabase schema
 --
--- Paste this ENTIRE file into your Supabase SQL Editor (Database → SQL Editor
--- → New query). Run it once. It creates:
+-- FRESH INSTALL: paste this ENTIRE file into Supabase SQL Editor and run once.
+-- EXISTING DATABASE: scroll to the MIGRATIONS section at the bottom and run
+--   only the statements you haven't applied yet — do NOT re-run the full file.
+--
+-- The full file creates:
 --   - three tables (categories, projects, receipts), all scoped per user
 --   - Row Level Security policies so users only see their own rows
 --   - a "seed defaults" trigger that gives every new signup a sensible
